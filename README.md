@@ -1,0 +1,1 @@
+# puppetlabs-aws_inventory
