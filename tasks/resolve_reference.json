@@ -1,0 +1,28 @@
+{
+  "description": "Generate targets from AWS EC2 instances",
+  "files": ["ruby_task_helper/files/task_helper.rb"],
+  "input_method": "stdin",
+  "parameters": {
+    "profile": {
+      "type": "Optional[String[1]]"
+    },
+    "region": {
+      "type": "String[1]"
+    },
+    "filters": {
+      "type": "Optional[Array]"
+    },
+    "credentials": {
+      "type": "Optional[String]"
+    },
+    "uri": {
+      "type": "Optional[String[1]]"
+    },
+    "name": {
+      "type": "Optional[String[1]]"
+    },
+    "config": {
+      "type": "Optional[Hash]"
+    }
+  }
+}
