@@ -20,11 +20,11 @@ class AwsInventory < TaskHelper
       options[:profile] = opts[:profile]
     end
     if opts[:credentials]
-      creds = File.expand_path(opts[:credentials])
+      creds = File.expand_path(opts[:credentials], opts[:_boltdir])
       if File.exist?(creds)
         options[:credentials] = Aws::SharedCredentials.new(path: creds)
       else
-        msg = "Cannot load credentials file #{opts[:credentials]}"
+        msg = "Cannot load credentials file #{creds}"
         raise TaskHelper::Error.new(msg, 'bolt-plugin/validation-error')
       end
     end

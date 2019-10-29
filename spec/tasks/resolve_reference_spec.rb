@@ -73,8 +73,8 @@ describe AwsInventory do
 
   describe "#config_client" do
     it 'raises a validation error when credentials file path does not exist' do
-      config_data = { credentials: '~/foo/credentials' }
-      expect { subject.config_client(opts.merge(config_data)) }.to raise_error(%r{foo/credentials})
+      config_data = { credentials: 'credentials', _boltdir: 'who/are/you' }
+      expect { subject.config_client(opts.merge(config_data)) }.to raise_error(%r{who/are/you/credentials})
     end
   end
 
