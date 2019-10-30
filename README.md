@@ -31,15 +31,18 @@ Accessing EC2 instances requires a region and valid credentials to be specified.
 
 **Region**
 
--   `region: <region>` in the inventory file
+In order of precedence:
+
+-   `region: <region>` in the inventory or config file
 -   `ENV['AWS_REGION']`
--   `credentials: <filepath>` in the config file
 -   `~/.aws/credentials`
 
 **Credentials**
 
+In order of precedence:
+
+-   `credentials: <filepath>` in the inventory or config file
 -   `ENV['AWS_ACCESS_KEY_ID']` and `ENV['AWS_SECRET_ACCESS_KEY']`
--   `credentials: <filepath>` in the config file
 -   `~/.aws/credentials`
 
 If the region or credentials are located in a shared credentials file, a `profile` can be specified in the inventory file to choose which set of credentials to use. For example, if the inventory file were set to `profile: user1`, the second set of credentials would be used:
@@ -56,7 +59,7 @@ aws_secret_access_key=...
 region=...
 ```
 
-AWS credential files stored in a non-standard location (`~/.aws/credentials`) can be specified in the Bolt config file:
+AWS credential files stored in a non-standard location (`~/.aws/credentials`) can be configured in Bolt:
 
 ```
 plugins:
@@ -65,6 +68,7 @@ plugins:
 ```
 
 ### Examples
+
 `inventory.yaml`
 ```yaml
 groups:

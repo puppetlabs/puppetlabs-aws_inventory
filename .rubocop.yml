@@ -13,9 +13,6 @@ AllCops:
 Style/IfUnlessModifier:
   Enabled: false
 
-Style/AccessModifierDeclarations:
-  Enabled: false
-
 Style/StringLiterals:
   Enabled: false
 
@@ -31,16 +28,7 @@ Style/NumericLiterals:
 Style/NumericPredicate:
   Enabled: false
 
-Style/StderrPuts:
-  Enabled: false
-
-Layout/EmptyLineAfterGuardClause:
-  Enabled: false
-
 Layout/IndentHeredoc:
-  Enabled: false
-
-Layout/ClosingHeredocIndentation:
   Enabled: false
 
 Style/GuardClause:
