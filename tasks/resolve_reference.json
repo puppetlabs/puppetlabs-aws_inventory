@@ -1,6 +1,8 @@
 {
   "description": "Generate targets from AWS EC2 instances",
-  "files": ["ruby_task_helper/files/task_helper.rb"],
+  "files": ["ruby_task_helper/files/task_helper.rb",
+    "ruby_plugin_helper/lib/plugin_helper.rb"
+  ],
   "input_method": "stdin",
   "parameters": {
     "profile": {
@@ -15,14 +17,8 @@
     "credentials": {
       "type": "Optional[String]"
     },
-    "uri": {
-      "type": "Optional[String[1]]"
-    },
-    "name": {
-      "type": "Optional[String[1]]"
-    },
-    "config": {
-      "type": "Optional[Hash]"
+    "target_mapping": {
+      "type": "Hash"
     }
   }
 }
