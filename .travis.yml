@@ -5,6 +5,7 @@ rvm:
 
 before_install:
 - git clone https://github.com/puppetlabs/puppetlabs-ruby_task_helper ../ruby_task_helper
+- git clone https://github.com/puppetlabs/puppetlabs-ruby_plugin_helper ../ruby_plugin_helper
 script:
 - bundle exec rake spec
 - bundle exec rubocop

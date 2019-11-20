@@ -29,10 +29,23 @@ describe AwsInventory do
 
   let(:opts) do
     {
-      name: 'public_dns_name',
-      uri: 'public_ip_address',
-      filters: [{ name: 'tag:Owner', values: ['foo'] }]
+      filters: [{ name: 'tag:Owner', values: ['foo'] }],
+      target_mapping: {
+        name: 'public_dns_name',
+        uri: 'public_ip_address'
+      }
     }
+  end
+
+  def deep_merge(hash1, hash2)
+    recursive_merge = proc do |_key, h1, h2|
+      if h1.is_a?(Hash) && h2.is_a?(Hash)
+        h1.merge(h2, &recursive_merge)
+      else
+        h2
+      end
+    end
+    hash1.merge(hash2, &recursive_merge)
   end
 
   context "with fake client" do
@@ -43,30 +56,30 @@ describe AwsInventory do
     describe "#resolve_reference" do
       it 'matches all running instances' do
         targets = subject.resolve_reference(opts)
-        expect(targets).to contain_exactly({ 'name' => name1, 'uri' => ip1 },
-                                           'name' => name2, 'uri' => ip2)
+        expect(targets).to contain_exactly({ name: name1, uri: ip1 },
+                                           name: name2, uri: ip2)
       end
 
       it 'sets only name if uri is not specified' do
-        opts.delete(:uri)
+        opts[:target_mapping].delete(:uri)
         targets = subject.resolve_reference(opts)
-        expect(targets).to contain_exactly({ 'name' => name1 },
-                                           'name' => name2)
-      end
-
-      it 'returns nothing if neither name nor uri are specified' do
-        targets = subject.resolve_reference({})
-        expect(targets).to be_empty
+        expect(targets).to contain_exactly({ name: name1 },
+                                           name: name2)
       end
 
       it 'builds a config map from the inventory' do
-        config_template = { 'ssh' => { 'host' => 'public_ip_address' } }
-        targets = subject.resolve_reference(opts.merge(config: config_template))
+        config_template = { target_mapping: { config: { ssh: { host: 'public_ip_address' } } } }
+        targets = subject.resolve_reference(deep_merge(opts, config_template))
 
-        config1 = { 'ssh' => { 'host' => ip1 } }
-        config2 = { 'ssh' => { 'host' => ip2 } }
-        expect(targets).to contain_exactly({ 'name' => name1, 'uri' => ip1, 'config' => config1 },
-                                           'name' => name2, 'uri' => ip2, 'config' => config2)
+        config1 = { ssh: { host: ip1 } }
+        config2 = { ssh: { host: ip2 } }
+        expect(targets).to contain_exactly({ name: name1, uri: ip1, config: config1 },
+                                           name: name2, uri: ip2, config: config2)
+      end
+
+      it 'raises an error if name or uri are not templated' do
+        expect { subject.resolve_reference(opts.delete(:target_mapping)) }
+          .to raise_error(/You must provide a 'name' or 'uri'/)
       end
     end
   end
@@ -74,7 +87,8 @@ describe AwsInventory do
   describe "#config_client" do
     it 'raises a validation error when credentials file path does not exist' do
       config_data = { credentials: 'credentials', _boltdir: 'who/are/you' }
-      expect { subject.config_client(opts.merge(config_data)) }.to raise_error(%r{who/are/you/credentials})
+      expect { subject.config_client(opts.merge(config_data)) }
+        .to raise_error(%r{who/are/you/credentials})
     end
   end
 
@@ -89,15 +103,6 @@ describe AwsInventory do
       result = subject.task(opts)
       expect(result).to have_key(:value)
       expect(result[:value]).to eq(targets)
-    end
-
-    it 'returns an error if one is raised' do
-      error = TaskHelper::Error.new('something went wrong', 'bolt.test/error')
-      allow(subject).to receive(:resolve_reference).and_raise(error)
-      result = subject.task({})
-
-      expect(result).to have_key(:_error)
-      expect(result[:_error]['msg']).to match(/something went wrong/)
     end
   end
 end
