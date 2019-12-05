@@ -20,12 +20,13 @@ The AWS Inventory plugin supports looking up running AWS EC2 instances. It suppo
 
 -   `profile`: The [named profile](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-profiles.html) to use when loading from AWS `config` and `credentials` files. (optional, defaults to `default`)
 -   `region`: The region to look up EC2 instances from.
--   `name`: The [EC2 instance attribute](https://docs.aws.amazon.com/sdkforruby/api/Aws/EC2/Instance.html) to use as the target name. (optional)
--   `uri`: The [EC2 instance attribute](https://docs.aws.amazon.com/sdkforruby/api/Aws/EC2/Instance.html) to use as the target URI. (optional)
 -   `filters`: The [filter request parameters](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeInstances.html) used to filter the EC2 instances by. Filters are name-values pairs, where the name is a request parameter and the values are an array of values to filter by. (optional)
--   `config`: A Bolt config map where the value for each config setting is an EC2 instance attribute.
+-   `target_mapping`: A hash of target attributes to populate with resource values. The following attributes are available.
+    - `config`: A bolt config map where the value for each config setting is an [EC2 instance attribute](https://docs.aws.amazon.com/sdkforruby/api/Aws/EC2/Instance.html).
+    - `name`: The [EC2 instance attribute](https://docs.aws.amazon.com/sdkforruby/api/Aws/EC2/Instance.html) to use as the target name.
+    - `uri`: The [EC2 instance attribute](https://docs.aws.amazon.com/sdkforruby/api/Aws/EC2/Instance.html) to use as the target URI.
 
-One of `uri` or `name` is required. If only `uri` is set, then the value of `uri` will be used as the `name`.
+> **Note:** One of `uri` or `name` is required. If only `uri` is set, then the value of `uri` will be used as the `name`.
 
 Accessing EC2 instances requires a region and valid credentials to be specified. The following locations are searched in order until a value is found:
 
@@ -77,16 +78,17 @@ groups:
       - _plugin: aws_inventory
         profile: user1
         region: us-west-1
-        name: public_dns_name
-        uri: public_ip_address
         filters:
           - name: tag:Owner
             values: [Devs]
           - name: instance-type
             values: [t2.micro, c5.large]
-        config:
-          ssh:
-            host: public_dns_name
+        target_mapping:
+          name: public_dns_name
+          uri: public_ip_address
+          config:
+            ssh:
+              host: public_dns_name
     config:
       ssh:
         user: ec2-user
