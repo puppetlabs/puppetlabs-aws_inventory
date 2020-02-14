@@ -20,5 +20,6 @@
     "target_mapping": {
       "type": "Hash"
     }
-  }
+  },
+  "private": true
 }
