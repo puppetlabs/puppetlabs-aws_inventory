@@ -57,6 +57,18 @@ class AwsInventory < TaskHelper
       end
     end
 
+    # "tags" is a special case where we want to transform the array-of-maps
+    # structure returned from the API into a single key/value map so that
+    # tags can be referenced in a template
+    target_data.each do |target|
+      next unless target['tags']
+
+      tag_map = target['tags'].each_with_object({}) do |tag, tags|
+        tags[tag['key']] = tag['value']
+      end
+      target['tags'] = tag_map
+    end
+
     target_data.map { |data| apply_mapping(template, data) }
   end
 
