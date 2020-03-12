@@ -13,11 +13,13 @@ describe AwsInventory do
       { instance_id: name1,
         public_ip_address: ip1,
         public_dns_name: name1,
-        state: { name: 'running' } },
+        state: { name: 'running' },
+        tags: [{ key: "Name", value: name1 }] },
       { instance_id: name2,
         public_ip_address: ip2,
         public_dns_name: name2,
-        state: { name: 'running' } }
+        state: { name: 'running' },
+        tags: [{ key: "Name", value: name2 }] }
     ]
   }
 
@@ -75,6 +77,14 @@ describe AwsInventory do
         config2 = { ssh: { host: ip2 } }
         expect(targets).to contain_exactly({ name: name1, uri: ip1, config: config1 },
                                            name: name2, uri: ip2, config: config2)
+      end
+
+      it 'allows tags to be referenced in target_mapping' do
+        opts[:target_mapping][:uri] = 'tags.Name'
+        targets = subject.resolve_reference(opts)
+
+        expect(targets).to contain_exactly({ name: name1, uri: name1 },
+                                           name: name2, uri: name2)
       end
 
       it 'raises an error if name or uri are not templated' do
