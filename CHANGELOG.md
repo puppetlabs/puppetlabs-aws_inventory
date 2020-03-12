@@ -1,3 +1,14 @@
+## Release 0.5.0
+
+### Bug fixes
+
+* **Reference tags in target_mapping** ([#9](https://github.com/puppetlabs/puppetlabs-aws_inventory/pulls/9))
+
+  Previously, the tags attribute couldn't be effectively used in
+  target_mapping because it contains an array of maps with "key" and
+  "value" fields. We now convert the tags attribute into a standard key/value map so
+  that tags can be looked up using `tags.Name` syntax.
+
 ## Release 0.4.0
 
 ### New features
