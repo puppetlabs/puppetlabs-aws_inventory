@@ -1,8 +1,18 @@
+## Release 0.5.1
+
+### Bug fixes
+
+* **Add missing dependencies to module metadata**
+  ([#10](https://github.com/puppetlabs/puppetlabs-aws_inventory/pull/11))
+
+  The module metadata now includes `ruby_plugin_helper` and `ruby_task_helper`
+  as dependencies.
+
 ## Release 0.5.0
 
 ### Bug fixes
 
-* **Reference tags in target_mapping** ([#9](https://github.com/puppetlabs/puppetlabs-aws_inventory/pulls/9))
+* **Reference tags in target_mapping** ([#9](https://github.com/puppetlabs/puppetlabs-aws_inventory/pull/9))
 
   Previously, the tags attribute couldn't be effectively used in
   target_mapping because it contains an array of maps with "key" and
@@ -13,7 +23,7 @@
 
 ### New features
 
-* **Set `resolve_reference` task to private** ([#6](https://github.com/puppetlabs/puppetlabs-aws_inventory/pulls/6))
+* **Set `resolve_reference` task to private** ([#6](https://github.com/puppetlabs/puppetlabs-aws_inventory/pull/6))
 
     The `resolve_reference` task has been set to `private` so it no longer appears in UI lists.
     
