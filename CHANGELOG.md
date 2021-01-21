@@ -1,3 +1,9 @@
+## Release 0.6.0
+
+### New features
+
+* **Bump maximum Puppet version to include 7.x**
+
 ## Release 0.5.2
 
 ### Bug fixes
