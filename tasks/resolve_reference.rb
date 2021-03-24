@@ -11,28 +11,40 @@ class AwsInventory < TaskHelper
 
   attr_accessor :client
 
-  def config_client(opts)
-    return client if client
-
-    options = {}
+  def client_config(opts)
+    config = {}
 
     if opts.key?(:region)
-      options[:region] = opts[:region]
+      config[:region] = opts[:region]
     end
     if opts.key?(:profile)
-      options[:profile] = opts[:profile]
+      config[:profile] = opts[:profile]
     end
     if opts[:credentials]
       creds = File.expand_path(opts[:credentials], opts[:_boltdir])
       if File.exist?(creds)
-        options[:credentials] = Aws::SharedCredentials.new(path: creds)
+        config[:credentials] = Aws::SharedCredentials.new(path: creds)
       else
         msg = "Cannot load credentials file #{creds}"
         raise TaskHelper::Error.new(msg, 'bolt-plugin/validation-error')
       end
+    else
+      if opts.key?(:aws_access_key_id)
+        config[:access_key_id] = opts[:aws_access_key_id]
+      end
+      if opts.key?(:aws_secret_access_key)
+        config[:secret_access_key] = opts[:aws_secret_access_key]
+      end
     end
 
-    Aws::EC2::Client.new(options)
+    config
+  end
+
+  def build_client(opts)
+    return client if client
+
+    config = client_config(opts)
+    Aws::EC2::Client.new(config)
   end
 
   def resolve_reference(opts)
@@ -42,7 +54,7 @@ class AwsInventory < TaskHelper
       raise TaskHelper::Error.new(msg, 'bolt-plugin/validation-error')
     end
 
-    client = config_client(opts)
+    client = build_client(opts)
     resource = Aws::EC2::Resource.new(client: client)
 
     # Retrieve a list of EC2 instances and create a list of targets

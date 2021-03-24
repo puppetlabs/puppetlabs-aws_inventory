@@ -17,6 +17,13 @@
     "credentials": {
       "type": "Optional[String]"
     },
+    "aws_access_key_id": {
+      "type": "Optional[String]"
+    },
+    "aws_secret_access_key": {
+      "type": "Optional[String]",
+      "sensitive": true
+    },
     "target_mapping": {
       "type": "Hash"
     }

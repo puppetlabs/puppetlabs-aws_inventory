@@ -94,11 +94,21 @@ describe AwsInventory do
     end
   end
 
-  describe "#config_client" do
+  describe "#client_config" do
     it 'raises a validation error when credentials file path does not exist' do
       config_data = { credentials: 'credentials', _boltdir: 'who/are/you' }
-      expect { subject.config_client(opts.merge(config_data)) }
+      expect { subject.client_config(opts.merge(config_data)) }
         .to raise_error(%r{who/are/you/credentials})
+    end
+
+    it 'sets access_key_id if specified' do
+      config = subject.client_config(opts.merge(aws_access_key_id: 'my_access_key_id'))
+      expect(config[:access_key_id]).to eq('my_access_key_id')
+    end
+
+    it 'sets secret_access_key if specified' do
+      config = subject.client_config(opts.merge(aws_secret_access_key: 'my_secret_access_key'))
+      expect(config[:secret_access_key]).to eq('my_secret_access_key')
     end
   end
 
