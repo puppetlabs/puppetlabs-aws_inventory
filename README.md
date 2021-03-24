@@ -20,6 +20,9 @@ The AWS Inventory plugin supports looking up running AWS EC2 instances. It suppo
 
 -   `profile`: The [named profile](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-profiles.html) to use when loading from AWS `config` and `credentials` files. (optional, defaults to `default`)
 -   `region`: The region to look up EC2 instances from.
+-   `credentials`: The path to an AWS credentials file to load. (optional, defaults to `~/.aws/credentials`)
+-   `aws_access_key_id`: The AWS access key id to use. (optional)
+-   `aws_secret_access_key`: The AWS secret access key to use. (optional)
 -   `filters`: The [filter request parameters](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeInstances.html) used to filter the EC2 instances by. Filters are name-values pairs, where the name is a request parameter and the values are an array of values to filter by. (optional)
 -   `target_mapping`: A hash of target attributes to populate with resource values. The following attributes are available.
     - `config`: A bolt config map where the value for each config setting is an [EC2 instance attribute](https://docs.aws.amazon.com/sdkforruby/api/Aws/EC2/Instance.html).
@@ -43,6 +46,7 @@ In order of precedence:
 In order of precedence:
 
 -   `credentials: <filepath>` in the inventory or config file
+-   `aws_access_key_id` and `aws_secret_access_key` in the inventory or config file
 -   `ENV['AWS_ACCESS_KEY_ID']` and `ENV['AWS_SECRET_ACCESS_KEY']`
 -   `~/.aws/credentials`
 
