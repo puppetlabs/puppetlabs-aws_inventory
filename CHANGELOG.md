@@ -1,3 +1,15 @@
+# Changelog
+
+## Release 0.7.0
+
+### New features
+
+* **Provide credentials as parameters**
+  ([#17](https://github.com/puppetlabs/puppetlabs-aws_inventory/pull/17))
+
+  The `resolve_reference` task has new `aws_access_key_id` and `aws_secret_access_key`
+  parameters for authenticating with AWS.
+
 ## Release 0.6.0
 
 ### New features

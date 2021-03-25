@@ -1,6 +1,6 @@
 {
   "name": "puppetlabs-aws_inventory",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "author": "Puppet, Inc.",
   "summary": "A task to generate Bolt inventory from AWS EC2 instances",
   "license": "Apache-2.0",
