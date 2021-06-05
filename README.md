@@ -24,7 +24,7 @@ The AWS Inventory plugin supports looking up running AWS EC2 instances. It suppo
 -   `aws_access_key_id`: The AWS access key id to use. (optional)
 -   `aws_secret_access_key`: The AWS secret access key to use. (optional)
 -   `filters`: The [filter request parameters](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeInstances.html) used to filter the EC2 instances by. Filters are name-values pairs, where the name is a request parameter and the values are an array of values to filter by. (optional)
--   `target_mapping`: A hash of target attributes to populate with resource values. The following attributes are available.
+-   `target_mapping`: A hash of target attributes to populate with resource values. Tags can referenced with tag.\<key\> (e.g. tag.Name). The following attributes are available.
     - `config`: A bolt config map where the value for each config setting is an [EC2 instance attribute](https://docs.aws.amazon.com/sdkforruby/api/Aws/EC2/Instance.html).
     - `name`: The [EC2 instance attribute](https://docs.aws.amazon.com/sdkforruby/api/Aws/EC2/Instance.html) to use as the target name.
     - `uri`: The [EC2 instance attribute](https://docs.aws.amazon.com/sdkforruby/api/Aws/EC2/Instance.html) to use as the target URI.
