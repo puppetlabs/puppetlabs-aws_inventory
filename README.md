@@ -93,6 +93,7 @@ groups:
           config:
             ssh:
               host: public_dns_name
+              user: tag.User
     config:
       ssh:
         user: ec2-user
