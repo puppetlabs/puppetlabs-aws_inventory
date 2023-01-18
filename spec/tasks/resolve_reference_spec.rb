@@ -101,6 +101,12 @@ describe AwsInventory do
         .to raise_error(%r{who/are/you/credentials})
     end
 
+    it 'fails when credentials process path does not exist' do
+      config_data = { credential_process: '/path/to/command' }
+      expect { subject.client_config(opts.merge(config_data)) }
+        .to raise_error(%r{Could not find process /path/to/command})
+    end
+
     it 'sets access_key_id if specified' do
       config = subject.client_config(opts.merge(aws_access_key_id: 'my_access_key_id'))
       expect(config[:access_key_id]).to eq('my_access_key_id')
