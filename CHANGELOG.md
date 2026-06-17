@@ -1,5 +1,12 @@
 # Changelog
 
+## Release 0.8.0
+
+### New features
+
+* **Allow ruby_task_helper 1.x**
+  ([#25](https://github.com/puppetlabs/puppetlabs-aws_inventory/pull/25))
+
 ## Release 0.7.0
 
 ### New features
