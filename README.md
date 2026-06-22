@@ -21,6 +21,7 @@ The AWS Inventory plugin supports looking up running AWS EC2 instances. It suppo
 -   `profile`: The [named profile](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-profiles.html) to use when loading from AWS `config` and `credentials` files. (optional, defaults to `default`)
 -   `region`: The region to look up EC2 instances from.
 -   `credentials`: The path to an AWS credentials file to load. (optional, defaults to `~/.aws/credentials`)
+-   `credential_process`: An [external credentials process command](https://docs.aws.amazon.com/cli/latest/topic/config-vars.html#sourcing-credentials-from-external-processes) used to obtain session credentials. (optional)
 -   `aws_access_key_id`: The AWS access key id to use. (optional)
 -   `aws_secret_access_key`: The AWS secret access key to use. (optional)
 -   `filters`: The [filter request parameters](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeInstances.html) used to filter the EC2 instances by. Filters are name-values pairs, where the name is a request parameter and the values are an array of values to filter by. (optional)
@@ -46,6 +47,7 @@ In order of precedence:
 In order of precedence:
 
 -   `credentials: <filepath>` in the inventory or config file
+-   `credential_process: <command>` in the inventory or config file
 -   `aws_access_key_id` and `aws_secret_access_key` in the inventory or config file
 -   `ENV['AWS_ACCESS_KEY_ID']` and `ENV['AWS_SECRET_ACCESS_KEY']`
 -   `~/.aws/credentials`
@@ -72,6 +74,36 @@ plugins:
     credentials: ~/alternate_path/credentials
 ```
 
+**External Credentials Process**
+
+The `credential_process` supports more complex authentication methods such as SSO or IAM multi-factor authentication.
+
+The `credential_process` parameter expects a command that acquires AWS session credentials from an external process, as documented in [https://docs.aws.amazon.com/cli/latest/topic/config-vars.html#sourcing-credentials-from-external-processes].
+
+**Note:** This example assumes you are running `bolt` in an interactive CLI session and can provide an MFA key to the AWS CLI when prompted.
+
+This profile sets `role_arn` and `mfa_serial` to assume a role that requires MFA authentication. Successful authentication requires presenting a time-based MFA token along with the account credentials.
+
+```
+[profile user1-with-mfa-role]
+region=...
+aws_access_key_id=...
+aws_secret_key=...
+role_arn = arn:aws:iam::0123456789012:role/user1-role
+mfa_serial=arn:aws:iam::0123456789012:mfa/user1
+```
+
+Set `credential_process` to run `aws configure export-credentials` from the desired profile:
+
+```
+aws_inventory:
+  ...
+  credential_process: /usr/local/bin/aws configure export-credentials --profile user1-with-mfa-role
+```
+When the inventory plugin runs, the AWS CLI interactively prompts the user for the MFA token code as needed.
+
+**Note:** The `aws configure export-credentials` feature is only available in AWS CLI version 2.9.0 or later.
+
 ### Examples
 
 `inventory.yaml`
@@ -81,6 +113,8 @@ groups:
     targets:
       - _plugin: aws_inventory
         profile: user1
+        # Example of an external credentials process for profile "user1"
+        #credential_process: /usr/local/bin/aws configure export-credentials --profile user1
         region: us-west-1
         filters:
           - name: tag:Owner
