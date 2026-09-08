@@ -1,48 +1,57 @@
 name: "ci"
 
 on:
-  pull_request:
+  push:
     branches:
       - "main"
-  pull_request_target:
-    types: [labeled, reopened]
+  pull_request:
     branches:
       - "main"
   workflow_dispatch:
 
-permissions:
-  contents: read
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+env:
+  CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
 jobs:
-  Spec:
-    if: github.event_name != 'pull_request_target'
-    uses: "puppetlabs/cat-github-actions/.github/workflows/module_ci.yml@main"
+  spec:
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby_version:
+          - '3.2'
+          - '4.0'
+        include:
+          - ruby_version: '3.2'
+            puppet_version: '~> 8.0'
+          - ruby_version: '4.0'
+            puppet_version: '~> 9.0'
+    name: "spec (ruby ${{ matrix.ruby_version }} | puppet ${{ matrix.puppet_version }})"
+    uses: "puppetlabs/cat-github-actions/.github/workflows/gem_ci.yml@main"
     secrets: "inherit"
-
-  Acceptance:
-    needs: Spec
-    if: >-
-      github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'pull_request' &&
-       github.event.pull_request.head.repo.fork == false) ||
-      (github.event_name == 'pull_request_target' &&
-       github.event.pull_request.head.repo.fork == true &&
-       contains(github.event.pull_request.labels.*.name, 'allowed-for-ci'))
-    uses: "puppetlabs/cat-github-actions/.github/workflows/module_acceptance.yml@main"
     with:
-      ruby_version: "3.2"
-      flags: >-
-        --nightly
-        --collection-platform-exclude 9:redhat-7
-        --collection-platform-exclude 9:centos-7
-        --collection-platform-exclude 9:oraclelinux-7
-        --collection-platform-exclude 9:scientific-7
-        --collection-platform-exclude 9:debian-10
-        --collection-platform-exclude 9:ubuntu-18.04
-        --collection-platform-exclude 9:ubuntu-20.04
-        --collection-platform-exclude 9:windows-2012r2-x86
+      rake_task: "spec:coverage"
+      ruby_version: ${{ matrix.ruby_version }}
+      puppet_gem_version: ${{ matrix.puppet_version }}
+
+  acceptance:
+    needs: "spec"
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby_version:
+          - "3.2"
+          - "4.0"
+        include:
+          - ruby_version: '3.2'
+            puppet_version: '~> 8.0'
+          - ruby_version: '4.0'
+            puppet_version: '~> 9.0'
+        runs_on:
+          - "windows-latest"
+    name: "acceptance (${{ matrix.runs_on}} ruby ${{ matrix.ruby_version }} | puppet ${{ matrix.puppet_version }})"
+    uses: "./.github/workflows/custom_acceptance.yml"
     secrets: "inherit"
+    with:
+      ruby_version: ${{ matrix.ruby_version }}
+      puppet_version: ${{ matrix.puppet_version }}
+      runs_on: ${{ matrix.runs_on }}

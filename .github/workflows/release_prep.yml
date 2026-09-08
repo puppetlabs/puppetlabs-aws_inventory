@@ -2,14 +2,55 @@ name: "Release Prep"
 
 on:
   workflow_dispatch:
-    inputs:
-      version:
-        description: "Module version to be released. Must be a valid semver string. (1.2.3)"
-        required: true
+   inputs:
+    target:
+      description: "The target for the release. This can be a commit sha or a branch."
+      required: false
+      default: "main"
+    version:
+      description: "Version of gem to be released."
+      required: true
 
 jobs:
-  release_prep:
-    uses: "puppetlabs/cat-github-actions/.github/workflows/module_release_prep.yml@main"
+  gem_release_prep:
+    uses: "puppetlabs/cat-github-actions/.github/workflows/gem_release_prep.yml@main"
     with:
+      target: "${{ github.event.inputs.target }}"
       version: "${{ github.event.inputs.version }}"
     secrets: "inherit"
+
+  module_release_prep:
+    needs: gem_release_prep
+    runs-on: "ubuntu-latest"
+
+    steps:
+
+      - name: "Checkout"
+        uses: "actions/checkout@v4"
+        with:
+          ref: 'release-prep'
+          fetch-depth: 0
+
+      - name: "Update metadata.json"
+        run: |
+          current_version=$(jq --raw-output .version metadata.json)
+          # Update version in metadata.json, only matching first occurrence
+          sed -i "0,/$current_version/s//${{ github.event.inputs.version }}/" $(find . -name 'metadata.json')
+
+      - name: "Get version"
+        id: "get_version"
+        run: |
+          echo "version=$(jq --raw-output .version metadata.json)" >> $GITHUB_OUTPUT
+
+      - name: "Commit changes"
+        run: |
+          git config --local user.email "${{ github.repository_owner }}@users.noreply.github.com"
+          git config --local user.name "GitHub Actions"
+          git add .
+          git commit -m "Module Release prep v${{ steps.get_version.outputs.version }}"
+      
+      - name: "Push changes"
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: release-prep
