@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require_relative '../../ruby_task_helper/files/task_helper'
-require_relative '../../ruby_plugin_helper/lib/plugin_helper'
+require_relative '../../ruby_task_helper/files/task_helper' unless Object.const_defined?(:TaskHelper)
+require_relative '../../ruby_plugin_helper/lib/plugin_helper' unless Object.const_defined?(:RubyPluginHelper)
 require 'json'
 require 'aws-sdk-ec2'
 
