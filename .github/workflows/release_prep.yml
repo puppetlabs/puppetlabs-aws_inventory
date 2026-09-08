@@ -12,15 +12,7 @@ on:
       required: true
 
 jobs:
-  gem_release_prep:
-    uses: "puppetlabs/cat-github-actions/.github/workflows/gem_release_prep.yml@main"
-    with:
-      target: "${{ github.event.inputs.target }}"
-      version: "${{ github.event.inputs.version }}"
-    secrets: "inherit"
-
   module_release_prep:
-    needs: gem_release_prep
     runs-on: "ubuntu-latest"
 
     steps:

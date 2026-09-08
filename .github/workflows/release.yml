@@ -9,14 +9,7 @@ on:
       default: "main"
 
 jobs:
-  gem_release:
-    uses: "puppetlabs/cat-github-actions/.github/workflows/gem_release.yml@main"
-    with:
-      target: "${{ github.event.inputs.target }}"
-    secrets: "inherit"
-  
   module_release:
-    needs: gem_release
     runs-on: "ubuntu-latest"
 
     steps:
@@ -24,7 +17,7 @@ jobs:
       - name: "Checkout"
         uses: "actions/checkout@v4"
         with:
-          ref: "${{ github.ref }}"
+          ref: "${{ github.event.inputs.target }}"
           clean: true
           fetch-depth: 0
 
