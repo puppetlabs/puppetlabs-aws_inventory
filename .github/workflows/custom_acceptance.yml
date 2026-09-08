@@ -1,10 +1,11 @@
-# This exists so we can force the acceptance tests to run under
-# powershell.exe.
+# Re-uses ruby-pwsh's custom_acceptance.yml shape (workflow_call inputs +
+# checkout/setup-ruby/bundle-exec-rake steps) so the acceptance job can be
+# matrixed by ruby_version/puppet_version the same way "spec" is.
 #
-# For such a small edge case it does not seem sensible adding extra
-# complication in to the shared actions at this point.
-#
-# Hopefully this is only a temporary work-around.
+# Deviates only where a Puppet module genuinely needs it: this repo has no
+# provision.yaml, so acceptance needs an explicit litmus docker
+# provision/install/run/tear-down sequence rather than ruby-pwsh's single
+# generic rake_task (which assumes no ephemeral test node to clean up).
 name: "Gem Acceptance"
 
 on:
@@ -16,19 +17,29 @@ on:
         default: "3.1"
         type: "string"
       puppet_version:
-        description: "The target Puppet version."
+        description: "The target Puppet gem version constraint (for bundle install)."
+        required: false
+        default: "~> 8.0"
+        type: "string"
+      puppet_collection:
+        description: "The litmus puppet-agent collection to install (e.g. puppet8, puppet9)."
         required: false
         default: "puppet8"
         type: "string"
       rake_task:
         description: "The name of the rake task that executes acceptance tests"
         required: false
-        default: "acceptance"
+        default: "litmus:acceptance:parallel"
         type: "string"
       runs_on:
         description: "The operating system used for the runner."
         required: false
         default: "ubuntu-latest"
+        type: "string"
+      collection_image:
+        description: "The litmus docker collection image to provision."
+        required: false
+        default: "litmusimage/ubuntu:24.04"
         type: "string"
 
 env:
@@ -39,6 +50,7 @@ jobs:
   acceptance:
     name: "acceptance"
     runs-on: ${{ inputs.runs_on }}
+    timeout-minutes: 60
 
     steps:
 
@@ -46,9 +58,8 @@ jobs:
         uses: "actions/checkout@v4"
 
       - name: "export environment"
-        shell: pwsh
         run: |
-          echo "PUPPET_GEM_VERSION=${{ inputs.puppet_version }}" >> $env:GITHUB_ENV
+          echo "PUPPET_GEM_VERSION=${{ inputs.puppet_version }}" >> $GITHUB_ENV
 
       - name: "setup ruby"
         uses: "ruby/setup-ruby@v1"
@@ -62,9 +73,26 @@ jobs:
           bundle env
           echo ::endgroup::
 
-      - name: "execute acceptance tests"
-        shell: powershell
+      - name: "provision environment"
         run: |
-          # This generic task to run acceptance tests.
-          # It should be overridden in the Rakefile.
+          bundle exec rake "litmus:provision[docker,${{ inputs.collection_image }}]"
+
+      - name: "install puppet agent"
+        run: |
+          bundle exec rake "litmus:install_agent[${{ inputs.puppet_collection }}]"
+
+      - name: "install module"
+        run: |
+          bundle exec rake "litmus:install_module"
+
+      - name: "execute acceptance tests"
+        run: |
           bundle exec rake ${{ inputs.rake_task }}
+
+      - name: "remove test environment"
+        if: ${{ always() }}
+        continue-on-error: true
+        run: |
+          if [[ -f spec/fixtures/litmus_inventory.yaml ]]; then
+            bundle exec rake "litmus:tear_down"
+          fi
