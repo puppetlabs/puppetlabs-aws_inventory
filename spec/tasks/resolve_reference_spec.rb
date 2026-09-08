@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
-require_relative '../fixtures/modules/ruby_task_helper/files/task_helper'
-require_relative '../fixtures/modules/ruby_plugin_helper/lib/plugin_helper'
 require_relative '../../tasks/resolve_reference'
 
 describe AwsInventory do
