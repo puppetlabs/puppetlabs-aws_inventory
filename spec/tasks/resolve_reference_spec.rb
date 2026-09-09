@@ -1,41 +1,41 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
-require_relative '../../tasks/resolve_reference.rb'
+require_relative '../../tasks/resolve_reference'
 
 describe AwsInventory do
   let(:ip1) { '255.255.255.255' }
   let(:ip2) { '127.0.0.1' }
   let(:name1) { 'test-instance-1' }
   let(:name2) { 'test-instance-2' }
-  let(:test_instances) {
+  let(:test_instances) do
     [
       { instance_id: name1,
         public_ip_address: ip1,
         public_dns_name: name1,
         state: { name: 'running' },
-        tags: [{ key: "Name", value: name1 }] },
+        tags: [{ key: 'Name', value: name1 }] },
       { instance_id: name2,
         public_ip_address: ip2,
         public_dns_name: name2,
         state: { name: 'running' },
-        tags: [{ key: "Name", value: name2 }] }
+        tags: [{ key: 'Name', value: name2 }] },
     ]
-  }
+  end
 
-  let(:test_client) {
-    ::Aws::EC2::Client.new(
-      stub_responses: { describe_instances: { reservations: [{ instances: test_instances }] } }
+  let(:test_client) do
+    Aws::EC2::Client.new(
+      stub_responses: { describe_instances: { reservations: [{ instances: test_instances }] } },
     )
-  }
+  end
 
   let(:opts) do
     {
       filters: [{ name: 'tag:Owner', values: ['foo'] }],
       target_mapping: {
         name: 'public_dns_name',
-        uri: 'public_ip_address'
-      }
+        uri: 'public_ip_address',
+      },
     }
   end
 
@@ -50,12 +50,12 @@ describe AwsInventory do
     hash1.merge(hash2, &recursive_merge)
   end
 
-  context "with fake client" do
+  context 'with fake client' do
     before(:each) do
       subject.client = test_client
     end
 
-    describe "#resolve_reference" do
+    describe '#resolve_reference' do
       it 'matches all running instances' do
         targets = subject.resolve_reference(opts)
         expect(targets).to contain_exactly({ name: name1, uri: ip1 },
@@ -89,12 +89,12 @@ describe AwsInventory do
 
       it 'raises an error if name or uri are not templated' do
         expect { subject.resolve_reference(opts.delete(:target_mapping)) }
-          .to raise_error(/You must provide a 'name' or 'uri'/)
+          .to raise_error(%r{You must provide a 'name' or 'uri'})
       end
     end
   end
 
-  describe "#client_config" do
+  describe '#client_config' do
     it 'raises a validation error when credentials file path does not exist' do
       config_data = { credentials: 'credentials', _boltdir: 'who/are/you' }
       expect { subject.client_config(opts.merge(config_data)) }
@@ -112,11 +112,11 @@ describe AwsInventory do
     end
   end
 
-  describe "#task" do
+  describe '#task' do
     it 'returns the list of targets' do
       targets = [
-        { "uri": "1.2.3.4", "name": "my-instance" },
-        { "uri": "1.2.3.5", "name": "my-other-instance" }
+        { uri: '1.2.3.4', name: 'my-instance' },
+        { uri: '1.2.3.5', name: 'my-other-instance' },
       ]
       allow(subject).to receive(:resolve_reference).and_return(targets)
 

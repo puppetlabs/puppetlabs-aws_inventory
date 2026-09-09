@@ -1,0 +1,5 @@
+---
+fixtures:
+  repositories:
+    ruby_task_helper: "https://github.com/puppetlabs/puppetlabs-ruby_task_helper.git"
+    ruby_plugin_helper: "https://github.com/puppetlabs/puppetlabs-ruby_plugin_helper.git"

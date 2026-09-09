@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require_relative '../../ruby_task_helper/files/task_helper.rb'
-require_relative '../../ruby_plugin_helper/lib/plugin_helper.rb'
+require_relative '../../ruby_task_helper/files/task_helper' unless Object.const_defined?(:TaskHelper)
+require_relative '../../ruby_plugin_helper/lib/plugin_helper' unless Object.const_defined?(:RubyPluginHelper)
 require 'json'
 require 'aws-sdk-ec2'
 
@@ -14,12 +14,8 @@ class AwsInventory < TaskHelper
   def client_config(opts)
     config = {}
 
-    if opts.key?(:region)
-      config[:region] = opts[:region]
-    end
-    if opts.key?(:profile)
-      config[:profile] = opts[:profile]
-    end
+    config[:region] = opts[:region] if opts.key?(:region)
+    config[:profile] = opts[:profile] if opts.key?(:profile)
     if opts[:credentials]
       creds = File.expand_path(opts[:credentials], opts[:_boltdir])
       if File.exist?(creds)
@@ -29,12 +25,8 @@ class AwsInventory < TaskHelper
         raise TaskHelper::Error.new(msg, 'bolt-plugin/validation-error')
       end
     else
-      if opts.key?(:aws_access_key_id)
-        config[:access_key_id] = opts[:aws_access_key_id]
-      end
-      if opts.key?(:aws_secret_access_key)
-        config[:secret_access_key] = opts[:aws_secret_access_key]
-      end
+      config[:access_key_id] = opts[:aws_access_key_id] if opts.key?(:aws_access_key_id)
+      config[:secret_access_key] = opts[:aws_secret_access_key] if opts.key?(:aws_secret_access_key)
     end
 
     config
