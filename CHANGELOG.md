@@ -1,5 +1,14 @@
 # Changelog
 
+## Release 1.0.0
+
+### Changes
+
+* **Add support for Puppet 9**
+
+  This is a major version bump: the module's supported Puppet version
+  requirement has been expanded to include Puppet 9.
+
 ## Release 0.8.0
 
 ### New features
