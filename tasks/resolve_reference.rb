@@ -24,6 +24,8 @@ class AwsInventory < TaskHelper
         msg = "Cannot load credentials file #{creds}"
         raise TaskHelper::Error.new(msg, 'bolt-plugin/validation-error')
       end
+    elsif opts[:credential_process]
+      config[:credentials] = Aws::ProcessCredentials.new(opts[:credential_process])
     else
       config[:access_key_id] = opts[:aws_access_key_id] if opts.key?(:aws_access_key_id)
       config[:secret_access_key] = opts[:aws_secret_access_key] if opts.key?(:aws_secret_access_key)
